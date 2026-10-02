@@ -318,21 +318,32 @@
       '<div class="leyenda">' + ley + '</div></div></div>';
   }
 
+  /** Abierto = alguien te debe o le debés. Si pagaron de más (saldo negativo) queda saldado: suele ser una deuda de antes de la app. */
+  function prestamoAbierto(p) { return p.meDebe > 0.5 || p.leDebo > 0.5; }
   function tarjetaPrestamos(soloAbiertos) {
     var per = Datos.cartera().personas, nombres = Object.keys(per).filter(function (k) { return Math.abs(per[k].meDebe) > 0.5 || Math.abs(per[k].leDebo) > 0.5; });
-    if (!nombres.length) return soloAbiertos ? '' : '<div class="lista"><div class="vacio"><div class="grande">🤝</div>No tenés préstamos abiertos.<br>Decí “le presté 20 lucas a Nacho” y aparece acá.</div></div>';
+    var abiertos = nombres.filter(function (k) { return prestamoAbierto(per[k]); });
+    if (soloAbiertos && !abiertos.length) return '';
+    if (!nombres.length) return '<div class="lista"><div class="vacio"><div class="grande">🤝</div>No tenés préstamos abiertos.<br>Decí “le presté 20 lucas a Nacho” y aparece acá.</div></div>';
     var meDeben = 0, debo = 0;
-    nombres.forEach(function (k) { meDeben += Math.max(0, per[k].meDebe); debo += Math.max(0, per[k].leDebo); });
+    abiertos.forEach(function (k) { meDeben += Math.max(0, per[k].meDebe); debo += Math.max(0, per[k].leDebo); });
     var h = '<div class="tarjeta"><div class="cabeza-tarjeta"><span class="etiqueta">Préstamos</span><a data-a="ir" data-tab="mas" data-sub="prestamos">Ver</a></div>' +
       '<div class="kv"><span>Te deben</span><b class="num pos">' + plata(meDeben) + '</b></div><div class="kv"><span>Debés</span><b class="num neg">' + plata(debo) + '</b></div></div>';
     if (soloAbiertos) return h;
+    var neto = function (k) { return Math.max(0, per[k].meDebe) - Math.max(0, per[k].leDebo); };
     h = '<div class="lista">';
-    nombres.sort(function (a, b) { return (per[b].meDebe - per[b].leDebo) - (per[a].meDebe - per[a].leDebo); }).forEach(function (k) {
-      var neto = per[k].meDebe - per[k].leDebo;
-      h += '<button class="fila" data-a="ver-persona" data-p="' + esc(k) + '"><div class="ico">🤝</div><div class="cuerpo"><div class="t1">' + esc(k) + '</div>' +
-        '<div class="t2">' + (per[k].meDebe > 0.5 ? 'te debe ' + plata(per[k].meDebe) : '') + (per[k].meDebe > 0.5 && per[k].leDebo > 0.5 ? ' · ' : '') + (per[k].leDebo > 0.5 ? 'le debés ' + plata(per[k].leDebo) : '') +
-        (per[k].meDebe < -0.5 ? 'le devolviste de más ' + plata(-per[k].meDebe) : '') + (per[k].leDebo < -0.5 ? 'le pagaste de más ' + plata(-per[k].leDebo) : '') + '</div></div>' +
-        '<div class="cifra num ' + (neto >= 0 ? 'pos' : 'neg') + '">' + (neto >= 0 ? '+' : '−') + plata(neto) + '</div></button>';
+    nombres.sort(function (a, b) {
+      var A = prestamoAbierto(per[a]), B = prestamoAbierto(per[b]);
+      return A !== B ? (A ? -1 : 1) : neto(b) - neto(a);
+    }).forEach(function (k) {
+      var p = per[k], n = neto(k), abierto = prestamoAbierto(p), partes = [];
+      if (p.meDebe > 0.5) partes.push('te debe ' + plata(p.meDebe));
+      if (p.leDebo > 0.5) partes.push('le debés ' + plata(p.leDebo));
+      if (p.meDebe < -0.5) partes.push('te devolvió ' + plata(-p.meDebe) + ' más de lo anotado');
+      if (p.leDebo < -0.5) partes.push('le pagaste ' + plata(-p.leDebo) + ' más de lo anotado');
+      h += '<button class="fila" data-a="ver-persona" data-p="' + esc(k) + '"><div class="ico">' + (abierto ? '🤝' : '✅') + '</div><div class="cuerpo"><div class="t1">' + esc(k) + '</div>' +
+        '<div class="t2">' + partes.join(' · ') + '</div></div>' +
+        (abierto ? '<div class="cifra num ' + (n >= 0 ? 'pos' : 'neg') + '">' + (n >= 0 ? '+' : '−') + plata(n) + '</div>' : '<div class="cifra" style="color:var(--nardo);font-size:13px;font-weight:600">saldado</div>') + '</button>';
     });
     return h + '</div>';
   }
@@ -429,7 +440,7 @@
   /* ---------------- MÁS ---------------- */
   function vistaMas() {
     if (S.sub) return subvista();
-    var per = Datos.cartera().personas, abiertos = Object.keys(per).filter(function (k) { return Math.abs(per[k].meDebe) > 0.5 || Math.abs(per[k].leDebo) > 0.5; }).length;
+    var per = Datos.cartera().personas, abiertos = Object.keys(per).filter(function (k) { return prestamoAbierto(per[k]); }).length;
     var s = Datos.Sync, v = Voz.motor(Datos.ajustes().voz);
     var item = function (sub, ico, t1, t2) {
       return '<button class="fila" data-a="ir" data-tab="mas" data-sub="' + sub + '"><div class="ico">' + ico + '</div><div class="cuerpo"><div class="t1">' + t1 + '</div><div class="t2">' + esc(t2) + '</div></div><span class="flecha">›</span></button>';
@@ -481,7 +492,9 @@
     var movs = ordenar(Datos.lista('movimientos').filter(function (m) { return m.persona === nombre || m.financiadoPor === nombre; }));
     var p = Datos.cartera().personas[nombre] || { meDebe: 0, leDebo: 0 };
     var h = cabSub(nombre, 'Préstamos');
-    h += '<div class="tarjeta"><div class="kv"><span>Te debe</span><b class="num pos">' + plata(Math.max(0, p.meDebe)) + '</b></div><div class="kv"><span>Le debés</span><b class="num neg">' + plata(Math.max(0, p.leDebo)) + '</b></div></div>';
+    h += '<div class="tarjeta"><div class="kv"><span>Te debe</span><b class="num pos">' + plata(Math.max(0, p.meDebe)) + '</b></div><div class="kv"><span>Le debés</span><b class="num neg">' + plata(Math.max(0, p.leDebo)) + '</b></div>' +
+      (p.leDebo < -0.5 ? '<p class="saludo" style="margin-top:8px">Le pagaste ' + plata(-p.leDebo) + ' más de lo anotado. Si era una deuda de antes de la app, está saldada.</p>' : '') +
+      (p.meDebe < -0.5 ? '<p class="saludo" style="margin-top:8px">Te devolvió ' + plata(-p.meDebe) + ' más de lo anotado.</p>' : '') + '</div>';
     h += '<div class="pastillas" style="margin:0 0 12px">' +
       (p.meDebe > 0.5 ? '<button class="btn btn-pri" data-a="abrir-chat" data-texto="' + esc(nombre) + ' me devolvió ">Me devolvió</button>' : '') +
       (p.leDebo > 0.5 ? '<button class="btn btn-pri" data-a="abrir-chat" data-texto="le devolví a ' + esc(nombre) + ' ">Le pagué</button>' : '') +
@@ -587,8 +600,11 @@
         '<div class="kv"><span>Pendientes</span><b>' + s.pendientes() + '</b></div>' +
         (s.error ? '<div class="kv"><span>Detalle</span><b style="color:var(--rojo);font-weight:500;text-align:right;max-width:60%">' + esc(s.error) + '</b></div>' : '') +
         '<div class="botonera"><button class="btn btn-pri" data-a="sincronizar">Sincronizar ahora</button></div></div>' +
-        '<div class="tarjeta"><div class="etiqueta">Vincular otro dispositivo</div><p class="saludo">En iPhone, la app instalada no comparte datos con Safari: copiá este código y pegalo en la app instalada (o en la compu) para que vea lo mismo.</p>' +
-        '<button class="btn btn-sec btn-ancho" data-a="copiar-codigo">Copiar código de vinculación</button></div>';
+        '<div class="tarjeta"><div class="etiqueta">Vincular otro dispositivo</div><p class="saludo">Mostrá el QR y escanealo con la cámara del otro teléfono: se abre la app ya vinculada.</p>' +
+        (S.verQR ? '<div class="qr-caja" id="qr-vinculo"><span>Generando…</span></div>' : '') +
+        '<div class="botonera"><button class="btn btn-sec" data-a="ver-qr">' + (S.verQR ? 'Ocultar QR' : 'Mostrar QR') + '</button><button class="btn btn-sec" data-a="copiar-codigo">Copiar código</button></div>' +
+        '<p class="saludo" style="font-size:12.5px;margin-top:10px">En iPhone, la app de la pantalla de inicio no comparte datos con Safari: copiá el código en Safari y pegalo en la app instalada (Más › Respaldo).</p></div>';
+      if (S.verQR) setTimeout(pintarQR, 0);
     }
     h += '<div class="seccion-tit">Copias en archivo</div><div class="lista menu">' +
       '<button class="fila" data-a="exportar" data-f="json"><div class="ico">💾</div><div class="cuerpo"><div class="t1">Copia completa (JSON)</div><div class="t2">Para restaurar todo en otro teléfono</div></div><span class="flecha">›</span></button>' +
@@ -596,6 +612,29 @@
       '<label class="fila" style="cursor:pointer"><div class="ico">📥</div><div class="cuerpo"><div class="t1">Restaurar una copia</div><div class="t2">Elegí un archivo JSON exportado</div></div><input type="file" accept="application/json,.json" data-i="importar" class="oculto"></label></div>';
     if (v) h += '<button class="btn btn-peligro btn-ancho" style="margin-top:8px" data-a="desvincular">Desvincular este teléfono</button>';
     return h;
+  }
+
+  /* QR de vinculación: se genera en el propio teléfono (la clave no sale a ningún servicio de QR). */
+  var QR_LIB = 'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js', qrLib = null;
+  function cargarQR() {
+    if (window.qrcode) return Promise.resolve();
+    if (!qrLib) qrLib = new Promise(function (ok, mal) {
+      var s = document.createElement('script'); s.src = QR_LIB; s.onload = ok;
+      s.onerror = function () { qrLib = null; mal(new Error('sin conexión')); };
+      document.head.appendChild(s);
+    });
+    return qrLib;
+  }
+  async function pintarQR() {
+    var caja = $('#qr-vinculo'), codigo = Datos.Sync.codigo();
+    if (!caja || !codigo) return;
+    try {
+      await cargarQR();
+      var qr = window.qrcode(0, 'M');
+      qr.addData(location.origin + location.pathname + '#v=' + codigo);
+      qr.make();
+      caja.innerHTML = qr.createSvgTag({ cellSize: 4, margin: 2, scalable: true });
+    } catch (e) { caja.innerHTML = '<span>No pude generar el QR (¿sin internet?). Usá “Copiar código”.</span>'; }
   }
 
   function vistaCotizaciones() {
@@ -1074,7 +1113,8 @@
         if (el.dataset.filtro) S.filtro = el.dataset.filtro;
         render(); window.scrollTo(0, 0); break;
       case 'ir': S.tab = el.dataset.tab; S.sub = el.dataset.sub || null; render(); window.scrollTo(0, 0); break;
-      case 'volver': S.sub = S.sub === 'persona' ? 'prestamos' : null; render(); window.scrollTo(0, 0); break;
+      case 'volver': S.verQR = false; S.sub = S.sub === 'persona' ? 'prestamos' : null; render(); window.scrollTo(0, 0); break;
+      case 'ver-qr': S.verQR = !S.verQR; S.mantenerScroll = true; render(); break;
       case 'mes': S.mes = sumarMes(S.mes, Number(el.dataset.k)); render(); break;
       case 'filtro': S.filtro = el.dataset.f; render(); break;
       case 'barra': S.barraSel = S.barraSel === el.dataset.d ? null : el.dataset.d; S.mantenerScroll = true; render(); break;

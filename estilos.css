@@ -351,6 +351,12 @@ button { cursor: pointer; border: none; background: none; padding: 0; }
 .pie-app { text-align: center; font-size: 11.5px; color: var(--texto-3); margin: 18px 0 4px; }
 .placa { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 5px 10px; border-radius: 99px; background: var(--carbon-2); border: 1px solid var(--linea); color: var(--texto-2); }
 
+/* QR de vinculación: fondo blanco para que la cámara lo lea bien */
+.qr-caja { background: #fff; border-radius: 18px; padding: 12px; width: min(240px, 72vw); aspect-ratio: 1; margin: 14px auto 0;
+  display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 1px rgba(133,187,101,.35), 0 10px 30px rgba(0,0,0,.45); }
+.qr-caja svg { width: 100%; height: 100%; display: block; }
+.qr-caja span { color: #3a3d40; font-size: 13px; text-align: center; padding: 10px; }
+
 @media (min-width: 700px) {
   #app { padding-top: 28px; }
   .heroe .valor { font-size: 48px; }
