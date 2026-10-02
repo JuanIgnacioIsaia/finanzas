@@ -319,9 +319,11 @@
     sincronizar: async function (forzar) {
       var v = this.vinculo();
       if (!v) { this.estado = 'sin-vincular'; emitir('sync', this); return; }
-      if (this.enCurso) { this.otraVez = true; return; }
+      // una sincronización colgada más de 50 s (app suspendida) no bloquea las siguientes
+      if (this.enCurso && Date.now() - (this.inicio || 0) < 50000) { this.otraVez = true; return; }
       if (!navigator.onLine && !forzar) { this.estado = 'pendiente'; emitir('sync', this); return; }
-      this.enCurso = true; this.estado = 'sincronizando'; emitir('sync', this);
+      clearTimeout(this.timerReintento);
+      this.enCurso = true; this.inicio = Date.now(); this.estado = 'sincronizando'; emitir('sync', this);
       try {
         var cambios = [];
         STORES.forEach(function (s) {
@@ -348,10 +350,13 @@
         for (var s2 in limpios) await putVarios(s2, limpios[s2]);
         await meta('ultimoSync', resp.ahora || Date.now());
         await meta('ultimoSyncLocal', Date.now());
-        this.estado = this.pendientes() ? 'pendiente' : 'ok'; this.error = null;
+        this.estado = this.pendientes() ? 'pendiente' : 'ok'; this.error = null; this.fallos = 0;
         if (Object.keys(porStore).length) emitir('cambio', { remoto: true });
       } catch (e) {
         this.estado = 'error'; this.error = e.message || String(e);
+        // reintento solo, cada vez más espaciado: 10 s, 30 s, 2 min, 5 min
+        var self = this; this.fallos = (this.fallos || 0) + 1;
+        this.timerReintento = setTimeout(function () { self.sincronizar(); }, [10, 30, 120, 300][Math.min(this.fallos - 1, 3)] * 1000);
       } finally {
         this.enCurso = false; emitir('sync', this);
         if (this.otraVez) { this.otraVez = false; this.programar(); }
@@ -359,11 +364,19 @@
     }
   };
 
+  /** Llama al respaldo con un tope de 40 s: si el teléfono suspende la app a mitad de camino, no queda colgada para siempre. */
   async function llamar(v, cuerpo) {
     cuerpo.t = v.t;
-    var r = await fetch(v.u, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(cuerpo), redirect: 'follow' });
-    var txt = await r.text();
-    try { return JSON.parse(txt); } catch (e) { throw new Error('Respuesta inválida del respaldo'); }
+    var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    var corte = setTimeout(function () { if (ctrl) ctrl.abort(); }, 40000);
+    try {
+      var r = await fetch(v.u, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(cuerpo), redirect: 'follow', signal: ctrl ? ctrl.signal : undefined });
+      var txt = await r.text();
+      try { return JSON.parse(txt); } catch (e) { throw new Error('Google devolvió algo raro (' + r.status + '). Se reintenta solo.'); }
+    } catch (e) {
+      if (e && (e.name === 'AbortError' || e.name === 'TypeError')) throw new Error('No hubo conexión con el respaldo. Se reintenta solo.');
+      throw e;
+    } finally { clearTimeout(corte); }
   }
 
   function decodificarVinculo(codigo) {

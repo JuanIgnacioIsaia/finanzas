@@ -242,7 +242,8 @@
         '<div class="valor" style="font-size:28px">Tocá el <span style="color:var(--verde-brillo)">+</span> y contame un movimiento</div>' +
         '<div class="sub">Hablale como a un amigo: “gasté 8 lucas en el súper con débito”, “le presté 50 mil a Nacho”, “compré 10 CEDEARs de Apple a 18.500”.</div>' +
         '<div class="pastillas"><button class="btn btn-pri" data-a="abrir-chat">Registrar el primero</button>' +
-        (Datos.Sync.vinculo() ? '' : '<button class="btn btn-sec" data-a="ir" data-tab="mas" data-sub="respaldo">Vincular respaldo</button>') + '</div></div>';
+        (Datos.Sync.vinculo() ? '' : Voz.esStandalone ? '<button class="btn btn-sec" data-a="pegar-y-vincular">Pegar código y vincular</button>' : '<button class="btn btn-sec" data-a="ir" data-tab="mas" data-sub="respaldo">Vincular respaldo</button>') + '</div>' +
+        (!Datos.Sync.vinculo() && Voz.esStandalone ? '<div class="sub" style="margin-top:12px">¿Ya la usás en Safari o en la compu? Allá: Más › Respaldo › Copiar código. Después tocá “Pegar código y vincular”.</div>' : '') + '</div>';
       return h + pie();
     }
     // héroe
@@ -1246,6 +1247,14 @@
         var cod = ($('#codigo-vinculo').value || '').trim();
         try { el.disabled = true; el.textContent = 'Vinculando…'; await Datos.Sync.vincular(cod); toast('Vinculado: bajando tu historial'); render(); }
         catch (err) { toast(err.message); el.disabled = false; el.textContent = 'Vincular'; }
+        break;
+      }
+      case 'pegar-y-vincular': {
+        var pegado = null;
+        try { pegado = await navigator.clipboard.readText(); } catch (err) { /* sin permiso */ }
+        if (!pegado || !Datos.decodificarVinculo(pegado)) { toast('No encontré un código copiado: pegalo a mano acá'); S.tab = 'mas'; S.sub = 'respaldo'; render(); break; }
+        try { el.disabled = true; el.textContent = 'Vinculando…'; await Datos.Sync.vincular(pegado); toast('Vinculado: bajando tu historial'); render(); }
+        catch (err) { toast(err.message); el.disabled = false; el.textContent = 'Pegar código y vincular'; }
         break;
       }
       case 'pegar-vinculo': {
