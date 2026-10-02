@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#040506">
+<meta name="color-scheme" content="dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Finanzas">
+<meta name="description" content="Registrá cualquier movimiento de plata hablando.">
+<title>Finanzas</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icono.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icono-180.png">
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<main id="app"><div class="vacio" style="padding-top:40vh"><div class="grande">$</div>Cargando…</div></main>
+
+<section class="chat" id="chat" aria-label="Registrar un movimiento">
+  <header class="chat-cab">
+    <div class="avatar">$</div>
+    <div><div class="nombre">Registrar</div><div class="estado" id="chat-estado">Hablá o escribí</div></div>
+    <button class="boton-icono cerrar" data-a="cerrar-chat" aria-label="Cerrar"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  </header>
+  <div class="chat-cuerpo" id="chat-cuerpo"></div>
+  <footer class="chat-pie">
+    <div class="aviso-voz oculto" id="aviso-voz"></div>
+    <div class="nivel oculto" id="nivel"><i></i></div>
+    <div class="chat-pie-int">
+      <textarea class="entrada" id="entrada" rows="1" placeholder="Ej: gasté 8 lucas en el súper" enterkeyhint="send" autocomplete="off"></textarea>
+      <button class="enviar oculto" id="enviar" data-a="enviar" aria-label="Enviar"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></button>
+      <button class="mic" id="mic" data-a="mic" aria-label="Hablar"></button>
+    </div>
+  </footer>
+</section>
+
+<div class="velo" id="velo"></div>
+<div class="hoja" id="hoja" role="dialog"></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script src="motor.js"></script>
+<script src="datos.js"></script>
+<script src="voz.js"></script>
+<script src="ia.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
