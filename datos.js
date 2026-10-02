@@ -125,11 +125,11 @@
     var c = Object.assign({}, r, { deleted: true });
     return guardar(store, c);
   }
-  async function meta(k, v) {
+  /** Lectura sincrónica (meta('x')) y escritura que devuelve una promesa (meta('x', valor)). */
+  function meta(k, v) {
     if (v === undefined) return mem.meta[k];
     mem.meta[k] = v;
-    await put('meta', { k: k, v: v });
-    return v;
+    return put('meta', { k: k, v: v }).then(function () { return v; });
   }
   function ajustes() { return mem.meta.ajustes || {}; }
   async function cambiarAjustes(cambios) {

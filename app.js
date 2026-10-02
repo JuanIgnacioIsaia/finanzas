@@ -41,7 +41,7 @@
     var a = Math.abs(n || 0), s = n < 0 ? '−' : '';
     if (a >= 1e6) return s + '$ ' + (a / 1e6).toLocaleString('es-AR', { maximumFractionDigits: 2 }) + ' M';
     if (a >= 1e5) return s + '$ ' + Math.round(a / 1e3).toLocaleString('es-AR') + ' mil';
-    return s + plata(a);
+    return s + plata(Math.round(a));
   }
   function etiquetaDia(iso) {
     var h = hoyISO(), d = new Date(iso + 'T12:00:00'), ay = new Date(); ay.setDate(ay.getDate() - 1);
@@ -787,7 +787,7 @@
     S.chat.mensajes.push({ de: 'yo', texto: texto });
     pintarChat();
     var ctx = Datos.contextoMotor();
-    var olv = Datos.meta('olvidadas') || [];
+    var olv = Datos.meta('olvidadas'); if (!Array.isArray(olv)) olv = [];
     olv.forEach(function (k) { delete ctx.reglas[k]; });
     var r = Motor.interpretar(texto, ctx);
     var movs = r.movimientos;

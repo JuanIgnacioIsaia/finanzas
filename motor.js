@@ -815,9 +815,11 @@
       var t = toks[j];
       if (!/^\p{L}/u.test(t.o) || vocab(t.n)) continue;
       var pv = toks[j - 1] ? toks[j - 1].n : '', nx = toks[j + 1] ? toks[j + 1].n : '';
-      var mayus = /^\p{Lu}/u.test(t.o) && j > 0;
-      var porPosicion = ['a', 'al', 'de', 'con', 'para'].indexOf(pv) >= 0 || nx === 'me';
-      if ((mayus && (porPosicion || tipo !== 'gasto')) || (porPosicion && /^(prestamo_|cobro_|pago_deuda)/.test(tipo || ''))) {
+      var propio = /^\p{Lu}/u.test(t.o);
+      var antesDeMe = nx === 'me' || nx === 'nos';
+      var trasPrep = ['a', 'al', 'de', 'con', 'para'].indexOf(pv) >= 0;
+      var contexto = /^(prestamo_|cobro_|pago_deuda|financiado)/.test(tipo || '');
+      if ((propio && (j > 0 || antesDeMe) && (trasPrep || antesDeMe || contexto)) || ((trasPrep || antesDeMe) && contexto)) {
         var nombre = t.o;
         if (toks[j + 1] && /^\p{Lu}/u.test(toks[j + 1].o) && !vocab(toks[j + 1].n)) nombre += ' ' + toks[j + 1].o;
         return { nombre: tituloNombre(nombre), tok: j };
@@ -1149,7 +1151,7 @@
 
     // ---- persona (préstamos, gastos pagados por otro)
     if (esPrestamo || tipoInfo.sub === 'financiado' || /\b(me pago|le pague|me pagaron)\b/.test(sEsp)) {
-      var p = detectarPersona(toks, c0, c1, ctx, tipo);
+      var p = detectarPersona(toks, c0, c1, ctx, tipoInfo.sub === 'financiado' ? 'financiado' : tipo);
       if (p) {
         if (tipoInfo.sub === 'financiado') mov.financiadoPor = p.nombre; else if (esPrestamo) mov.persona = p.nombre;
         else mov.personaMencionada = p.nombre;
