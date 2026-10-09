@@ -407,7 +407,7 @@ button.tarjeta { display: block; width: 100%; text-align: left; }
 .mini-barras { display: flex; align-items: flex-end; gap: 4px; height: 52px; min-width: 84px; }
 .mini-barras i { flex: 1; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, var(--oro), rgba(212,175,55,.35)); }
 .dolar-heroe { background: radial-gradient(140% 100% at 100% 0%, rgba(212,175,55,.2), transparent 55%), linear-gradient(160deg, #1D1806, #0C0A04 55%, #070605); border-color: rgba(212,175,55,.28); }
-.dolar-heroe .marca-agua { color: var(--oro); font-size: 120px; top: -10px; right: -6px; }
+.dolar-heroe .marca-agua { color: var(--oro); font-size: 84px; top: 4px; right: 10px; opacity: .07; }
 .dolar-heroe .valor { color: #E9CF77; }
 .tabla-dolar > div { display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 6px; padding: 10px 0; border-bottom: 1px solid var(--linea); font-size: 13px; align-items: start; }
 .tabla-dolar > div:last-child { border-bottom: none; }

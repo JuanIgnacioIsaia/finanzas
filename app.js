@@ -237,7 +237,8 @@
     var p = (act - ant) / ant;
     if (Math.abs(p) < 0.005) return '<span class="delta igual">= igual</span>';
     var bueno = subirEsBueno ? p > 0 : p < 0;
-    return '<span class="delta ' + (bueno ? 'bien' : 'mal') + '">' + (p > 0 ? '▲ ' : '▼ ') + Math.min(999, Math.abs(Math.round(p * 100))) + '%</span>';
+    var txt = p >= 2 ? '× ' + (act / ant).toLocaleString('es-AR', { maximumFractionDigits: act / ant >= 10 ? 0 : 1 }) : Math.abs(Math.round(p * 100)) + '%';
+    return '<span class="delta ' + (bueno ? 'bien' : 'mal') + '">' + (p > 0 ? '▲ ' : '▼ ') + txt + '</span>';
   }
   function colorDe(nombre) { var h = 0; String(nombre).split('').forEach(function (c) { h = (h * 31 + c.charCodeAt(0)) % 997; }); return COLORES[h % COLORES.length]; }
   function avatar(nombre) {
@@ -276,8 +277,16 @@
         (Datos.Sync.vinculo() ? '' : Voz.esStandalone ? '<button class="btn btn-sec" data-a="pegar-y-vincular">Pegar código y vincular</button>' : '') + '</div></div>';
       return h + pie();
     }
-    h += heroeBalance(r, nombreMes);
-    h += tiraMes(r, ant, hoy);
+    if (!r.cantidad) {
+      h += '<div class="tarjeta heroe"><div class="marca-agua">$</div><div class="etiqueta">' + esc(cap(nombreMes)) + '</div>' +
+        '<div class="valor" style="font-size:24px;line-height:1.25">Todavía no hay movimientos este mes</div>' +
+        '<div class="sub">Tocá el + y dictá lo primero: el sueldo, un gasto o una compra de dólares.</div>' +
+        '<div class="pastillas"><button class="btn btn-pri" data-a="abrir-chat">Registrar</button>' + (S.mes !== sumarMes(mesActual(), -1) ? '' : '') +
+        '<button class="btn btn-sec" data-a="mes" data-k="-1">Ver ' + esc(MESES[+sumarMes(S.mes, -1).slice(5) - 1]) + '</button></div></div>';
+    } else {
+      h += heroeBalance(r, nombreMes);
+      h += tiraMes(r, ant, hoy);
+    }
     h += tarjetaDolares(r);
     h += panelDeudas();
     h += tarjetaTopCategorias(r, ant);
@@ -294,7 +303,8 @@
     var sub = r.ingresos > 0
       ? 'Gastaste el ' + pctTxt(r.tasaGasto) + ' de lo que entró' + (ahorro > 0 ? ' y ahorraste el ' + pctTxt(r.tasaAhorro) : '')
       : 'Todavía no registraste ingresos en ' + nombreMes;
-    var col = function (dot, et, v, cls) { return '<div><span class="punto ' + dot + '"></span>' + et + '<b class="num ' + cls + '">' + v + '</b></div>'; };
+    var col = function (dot, et, v, cls) { return '<div><span><span class="punto ' + dot + '"></span>' + et + '</span><b class="num ' + cls + '">' + v + '</b></div>'; };
+    bal = Math.round(bal);
     return '<div class="tarjeta heroe"><div class="marca-agua">$</div>' +
       '<div class="etiqueta">Balance de ' + esc(nombreMes) + '</div>' +
       '<div class="valor num ' + (bal >= 0 ? 'pos' : 'neg') + '" data-n="' + bal + '">' + (bal < 0 ? '−' : '') + plata(bal) + '</div>' +
@@ -370,11 +380,12 @@
       if (P[k].leDebo > 0.5) { debo.push(P[k]); tDebo += P[k].leDebo; }
     });
     if (!deben.length && !debo.length) return '';
-    var chips = deben.sort(function (a, b) { return b.meDebe - a.meDebe; }).map(function (p) {
-      return '<button class="persona-chip" data-a="ver-persona" data-p="' + esc(p.nombre) + '">' + avatar(p.nombre) + '<span>' + esc(p.nombre) + '</span><b class="num pos">' + corta(p.meDebe) + '</b></button>';
-    }).concat(debo.sort(function (a, b) { return b.leDebo - a.leDebo; }).map(function (p) {
-      return '<button class="persona-chip" data-a="ver-persona" data-p="' + esc(p.nombre) + '">' + avatar(p.nombre) + '<span>' + esc(p.nombre) + '</span><b class="num neg">−' + corta(p.leDebo) + '</b></button>';
-    })).join('');
+    var abiertos = Object.keys(P).map(function (k) { return P[k]; }).filter(prestamoAbierto)
+      .map(function (p) { p.neto = Math.max(0, p.meDebe) - Math.max(0, p.leDebo); return p; })
+      .sort(function (a, b) { return Math.abs(b.neto) - Math.abs(a.neto); });
+    var chips = abiertos.map(function (p) {
+      return '<button class="persona-chip" data-a="ver-persona" data-p="' + esc(p.nombre) + '">' + avatar(p.nombre) + '<span>' + esc(p.nombre) + '</span><b class="num ' + (p.neto >= 0 ? 'pos' : 'neg') + '">' + (p.neto >= 0 ? '+' : '−') + corta(Math.abs(p.neto)) + '</b></button>';
+    }).join('');
     return '<div class="tarjeta"><div class="cabeza-tarjeta"><span class="etiqueta">Préstamos y deudas</span>' + linkSub('prestamos', 'Ver todo') + '</div>' +
       '<div class="deuda-tiles"><button class="dt pos" data-a="sub" data-sub="prestamos"><small>Te deben</small><b class="num">' + plata(tDeben) + '</b><em>' + deben.length + ' persona' + (deben.length === 1 ? '' : 's') + '</em></button>' +
       '<button class="dt neg" data-a="sub" data-sub="prestamos"><small>Debés</small><b class="num">' + plata(tDebo) + '</b><em>' + debo.length + ' persona' + (debo.length === 1 ? '' : 's') + '</em></button></div>' +
@@ -409,7 +420,7 @@
       if (!isFinite(fin) || Math.abs(fin) < 1) return;
       function paso(t) {
         var k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3), v = fin * e;
-        el.textContent = (v < 0 ? '−' : '') + plata(v);
+        el.textContent = (v < 0 ? '−' : '') + plata(Math.round(v));
         if (k < 1) requestAnimationFrame(paso);
       }
       requestAnimationFrame(paso);
