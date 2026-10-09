@@ -357,6 +357,132 @@ button { cursor: pointer; border: none; background: none; padding: 0; }
 .qr-caja svg { width: 100%; height: 100%; display: block; }
 .qr-caja span { color: #3a3d40; font-size: 13px; text-align: center; padding: 10px; }
 
+/* =====================================================================
+ *  v2 — tablero más claro: balance real, dólares, deudas y análisis
+ * ===================================================================== */
+button.tarjeta { display: block; width: 100%; text-align: left; }
+.tenue { color: var(--texto-3) !important; }
+.oro { color: var(--oro); }
+.heroe .nota-heroe { margin-top: 12px; font-size: 11px; color: var(--texto-3); line-height: 1.4; }
+
+/* barra de flujo: gastos | ahorro | lo que queda */
+.flujo-barra { display: flex; height: 10px; border-radius: 99px; overflow: hidden; background: rgba(255,255,255,.06); margin: 16px 0 12px; gap: 2px; }
+.flujo-barra i { display: block; height: 100%; transition: width .5s ease; }
+.flujo-barra .g { background: linear-gradient(90deg, #C2554A, var(--rojo)); }
+.flujo-barra .a { background: linear-gradient(90deg, #B8962C, var(--oro)); }
+.flujo-barra .l { background: linear-gradient(90deg, var(--verde-medio), var(--verde-brillo)); }
+.flujo-ley { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.flujo-ley > div { font-size: 11.5px; color: var(--texto-2); display: flex; flex-direction: column; gap: 3px; }
+.flujo-ley b { font-size: 16px; font-weight: 740; letter-spacing: -.03em; color: var(--texto); }
+.flujo-ley b.pos { color: var(--verde-brillo); } .flujo-ley b.neg { color: var(--rojo); } .flujo-ley b.oro { color: var(--oro); }
+.punto { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 5px; vertical-align: 1px; }
+.punto.ing { background: var(--verde-brillo); } .punto.gas { background: var(--rojo); } .punto.aho { background: var(--oro); }
+
+/* tira de números chicos */
+.tira { display: grid; grid-template-columns: repeat(3, 1fr); padding: 14px 6px; }
+.tira > div { text-align: center; border-right: 1px solid var(--linea); }
+.tira > div:last-child { border-right: none; }
+.tira small { display: block; font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--texto-3); font-weight: 700; }
+.tira b { display: block; font-size: 17px; font-weight: 740; margin-top: 4px; letter-spacing: -.03em; }
+.tira b.pos { color: var(--verde-brillo); } .tira b.neg { color: var(--rojo); }
+.comparo { font-size: 12.5px; color: var(--texto-2); margin: -4px 6px 14px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.comparo::before { content: "●"; font-size: 9px; color: var(--nardo); }
+.comparo.mal::before { color: var(--rojo); } .comparo.bien::before { color: var(--verde-brillo); }
+
+/* aviso de respaldo */
+.aviso { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 14px 16px; margin-bottom: 12px;
+  border-radius: 18px; background: rgba(227, 166, 75, .09); border: 1px solid rgba(227, 166, 75, .35); }
+.aviso-ico { font-size: 22px; }
+.aviso-txt { flex: 1; font-size: 12.5px; color: var(--texto-2); line-height: 1.4; }
+.aviso-txt b { display: block; color: var(--ambar); font-size: 14px; margin-bottom: 2px; }
+.aviso .flecha { color: var(--ambar); font-size: 22px; }
+
+/* dólares */
+.tarjeta.dolar { border-color: rgba(212, 175, 55, .28);
+  background: radial-gradient(120% 90% at 100% 0%, rgba(212,175,55,.13), transparent 60%), var(--carbon); }
+.tarjeta.dolar.vacia { border-style: dashed; }
+.tarjeta.dolar .sub { color: var(--texto-2); font-size: 12.5px; margin-top: 3px; }
+.dolar-fila { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; }
+.dolar-valor { font-size: 32px; font-weight: 780; letter-spacing: -.04em; color: #E9CF77; }
+.mini-barras { display: flex; align-items: flex-end; gap: 4px; height: 52px; min-width: 84px; }
+.mini-barras i { flex: 1; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, var(--oro), rgba(212,175,55,.35)); }
+.dolar-heroe { background: radial-gradient(140% 100% at 100% 0%, rgba(212,175,55,.2), transparent 55%), linear-gradient(160deg, #1D1806, #0C0A04 55%, #070605); border-color: rgba(212,175,55,.28); }
+.dolar-heroe .marca-agua { color: var(--oro); font-size: 120px; top: -10px; right: -6px; }
+.dolar-heroe .valor { color: #E9CF77; }
+.tabla-dolar > div { display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 6px; padding: 10px 0; border-bottom: 1px solid var(--linea); font-size: 13px; align-items: start; }
+.tabla-dolar > div:last-child { border-bottom: none; }
+.tabla-dolar > div > span:not(:first-child) { text-align: right; }
+.tabla-dolar small { display: block; font-size: 10.5px; color: var(--texto-3); }
+.tabla-dolar .cab { font-size: 10.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--texto-3); font-weight: 700; padding-top: 0; }
+
+/* préstamos y deudas */
+.deuda-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 12px; }
+.deuda-tiles .dt { text-align: left; padding: 13px 14px; border-radius: 16px; border: 1px solid var(--linea); background: var(--carbon-2); }
+.deuda-tiles .dt small { display: block; font-size: 11px; color: var(--texto-2); font-weight: 600; }
+.deuda-tiles .dt b { display: block; font-size: 20px; font-weight: 760; letter-spacing: -.035em; margin: 3px 0 1px; }
+.deuda-tiles .dt em { font-style: normal; font-size: 11px; color: var(--texto-3); }
+.deuda-tiles .dt.pos { background: rgba(133,187,101,.08); border-color: rgba(133,187,101,.25); } .deuda-tiles .dt.pos b { color: var(--verde-brillo); }
+.deuda-tiles .dt.neg { background: rgba(231,105,92,.08); border-color: rgba(231,105,92,.25); } .deuda-tiles .dt.neg b { color: var(--rojo); }
+.deuda-tiles.grande .dt { padding: 16px; } .deuda-tiles.grande .dt b { font-size: 24px; }
+.personas-chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 -2px; padding: 2px; }
+.personas-chips::-webkit-scrollbar { display: none; }
+.persona-chip { display: flex; align-items: center; gap: 8px; padding: 6px 12px 6px 6px; border-radius: 99px; background: var(--carbon-2); border: 1px solid var(--linea); white-space: nowrap; font-size: 13px; }
+.persona-chip b { font-weight: 700; }
+.avatar { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%; font-size: 12px; font-weight: 800; flex-shrink: 0; }
+.fila .avatar { width: 40px; height: 40px; font-size: 14px; }
+.deuda-fila { display: grid; grid-template-columns: 40px 1fr auto; gap: 12px; align-items: center; padding: 14px 16px; width: 100%; text-align: left; border-bottom: 1px solid var(--linea); }
+.deuda-fila:last-child { border-bottom: none; }
+.deuda-fila .avatar { width: 40px; height: 40px; font-size: 14px; }
+.deuda-fila .t1 { font-weight: 650; font-size: 15px; } .deuda-fila .t2 { font-size: 12px; color: var(--texto-2); margin-top: 2px; }
+.deuda-fila .cat-barra { margin: 7px 0 5px; }
+.deuda-fila .cifra { font-size: 16px; font-weight: 740; }
+
+/* categorías */
+.cat-fila { display: grid; grid-template-columns: 38px 1fr; gap: 12px; align-items: center; width: 100%; text-align: left; padding: 10px 0; border-bottom: 1px solid var(--linea); }
+.cat-fila:last-of-type { border-bottom: none; }
+.cat-ico { width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.cat-top { display: flex; justify-content: space-between; gap: 10px; font-size: 14.5px; }
+.cat-top span { font-weight: 600; } .cat-top b { font-weight: 720; letter-spacing: -.02em; }
+.cat-barra { height: 5px; border-radius: 99px; background: rgba(255,255,255,.06); overflow: hidden; margin: 6px 0 5px; }
+.cat-barra i { display: block; height: 100%; border-radius: 99px; }
+.cat-pie { display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; color: var(--texto-3); }
+.delta { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 99px; white-space: nowrap; }
+.delta.mal { color: var(--rojo); background: rgba(231,105,92,.12); }
+.delta.bien { color: var(--verde-brillo); background: rgba(133,187,101,.12); }
+.delta.igual { color: var(--texto-3); background: rgba(255,255,255,.05); }
+.ver-mas { display: block; text-align: center; padding-top: 12px; color: var(--verde); font-size: 13px; font-weight: 600; }
+
+/* análisis */
+.kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 12px; }
+.kpi { text-align: left; background: var(--carbon); border: 1px solid var(--linea); border-radius: 17px; padding: 13px 14px; box-shadow: 0 8px 20px rgba(0,0,0,.4); min-width: 0; }
+.kpi small { display: block; font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--texto-3); font-weight: 700; }
+.kpi b { display: block; font-size: 21px; font-weight: 760; letter-spacing: -.035em; margin: 5px 0 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kpi-pie { display: flex; gap: 6px; align-items: center; font-size: 11.5px; color: var(--texto-2); min-width: 0; }
+.kpi-pie span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tendencia { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+.mes-col { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 6px 2px; border-radius: 12px; }
+.mes-col.sel { background: rgba(133,187,101,.08); }
+.mes-col .pares { display: flex; align-items: flex-end; justify-content: center; gap: 3px; height: 110px; width: 100%; }
+.mes-col .pares i { width: 26%; border-radius: 4px 4px 2px 2px; min-height: 0; }
+.pares .ing, .ley-mini .ing { background: var(--verde); } .pares .gas, .ley-mini .gas { background: var(--rojo); } .pares .aho, .ley-mini .aho { background: var(--oro); }
+.mes-col small { font-size: 11px; color: var(--texto-2); text-transform: capitalize; font-weight: 600; }
+.mes-col em { font-style: normal; font-size: 10.5px; min-height: 13px; color: var(--texto-3); }
+.mes-col em.pos { color: var(--verde-brillo); } .mes-col em.neg { color: var(--rojo); }
+.ley-mini { font-size: 10.5px; color: var(--texto-3); display: flex; align-items: center; gap: 5px; }
+.ley-mini i { width: 8px; height: 8px; border-radius: 2px; display: inline-block; margin-left: 4px; }
+.semana { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.semana .col { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.semana .pista { height: 80px; width: 100%; display: flex; align-items: flex-end; justify-content: center; }
+.semana .pista i { width: 62%; border-radius: 5px 5px 2px 2px; background: var(--nardo-osc); }
+.semana .col.top .pista i { background: linear-gradient(180deg, var(--verde-brillo), var(--verde-medio)); }
+.semana small { font-size: 11px; color: var(--texto-2); font-weight: 600; }
+.semana em { font-style: normal; font-size: 9.5px; color: var(--texto-3); }
+.medio { display: grid; grid-template-columns: 1.3fr 1.4fr auto; gap: 10px; align-items: center; padding: 7px 0; font-size: 13.5px; }
+.medio .cat-barra { margin: 0; }
+.medio b { font-weight: 700; }
+.fchip.oro { color: #E9CF77; border-color: rgba(212,175,55,.35); }
+@media (max-width: 380px) { .kpi b { font-size: 18px; } .heroe .valor { font-size: 36px; } .flujo-ley b { font-size: 14px; } }
+
 @media (min-width: 700px) {
   #app { padding-top: 28px; }
   .heroe .valor { font-size: 48px; }

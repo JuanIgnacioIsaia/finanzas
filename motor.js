@@ -26,7 +26,7 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
 
-  var VERSION = '1.0.0';
+  var VERSION = '1.1.0';
 
   /* ================================================================
    *  CATÁLOGO BASE (ids fijos: los comparten la app y el backend)
@@ -59,27 +59,29 @@
     ['transporte-fijo', 'Transporte fijo', 'gasto', 'fijo', '🚇', '#557A95', 'Necesidad', 'abono,cochera,patente,vtv,transferencia del auto,transferencia del tiida,registro automotor'],
     // ---- gastos variables
     ['supermercado', 'Supermercado', 'gasto', 'variable', '🛒', '#85BB65', 'Necesidad', 'super,supermercado,chino,coto,disco,jumbo,carrefour,vea,changomas,almacen,despensa,mayorista,makro,vital,maxiconsumo,la anonima,verduleria,verdura,fruta,compras de la semana,mercaderia para casa'],
-    ['comida', 'Comida', 'gasto', 'variable', '🍽️', '#A8D58B', 'Necesidad', 'comida,almuerzo,almorce,almorzamos,cena,cene,cenamos,desayuno,desayune,merienda,merende,morfi,vianda,menu,milanesa,milanga,empanada,pizza,hamburguesa,sandwich,sanguche,lomito,choripan,chori,parrilla,parrillada,tortilla,tarta,pasta,ravioles,noquis,locro,guiso,comedor,resto,restaurante,restaurant,bodegon,cantina,picada,helado,heladeria,cafe,cafecito,medialunas con cafe,gaseosa,coca,agua,sushi,wok,poke,taco,burrito,kebab,shawarma,ramen,chivito,pancho,papas fritas,ensalada,omelette,pollo al spiedo,rotiseria'],
+    ['comida', 'Comida', 'gasto', 'variable', '🍽️', '#A8D58B', 'Necesidad', 'comida,comi,comimos,comer,mcdonalds,mc donalds,mc,mostaza,burger king,burger,wendys,kfc,subway,pizzeria,almuerzo,almorce,almorzamos,cena,cene,cenamos,desayuno,desayune,merienda,merende,morfi,vianda,menu,milanesa,milanga,empanada,pizza,hamburguesa,sandwich,sanguche,lomito,choripan,chori,parrilla,parrillada,tortilla,tarta,pasta,ravioles,noquis,locro,guiso,comedor,resto,restaurante,restaurant,bodegon,cantina,picada,helado,heladeria,cafe,cafecito,medialunas con cafe,gaseosa,coca,agua,sushi,wok,poke,taco,burrito,kebab,shawarma,ramen,chivito,pancho,papas fritas,ensalada,omelette,pollo al spiedo,rotiseria'],
     ['delivery', 'Delivery', 'gasto', 'variable', '🛵', '#C07A4A', 'Deseo', 'delivery,pedidos ya,pedidosya,rappi,pedi comida,pedimos comida,por app'],
     ['bar-y-salidas', 'Bar y salidas', 'gasto', 'variable', '🍻', '#D4AF37', 'Deseo', 'bar,birra,cerveza,pinta,fernet,trago,after,afterwork,previa,salida,salimos,vino,gin,cerveceria,ronda'],
-    ['ocio', 'Ocio', 'gasto', 'variable', '🎟️', '#C76B79', 'Deseo', 'entrada,recital,show,cine,teatro,fiesta,evento,festival,boliche,joda,juego,steam,playstation,bowling,paintball,karting,escape room,cumple,cumpleanos'],
+    ['ocio', 'Ocio', 'gasto', 'variable', '🎟️', '#C76B79', 'Deseo', 'apuesta,apuestas,bet,bet365,codere,bplay,casino,loteria,quiniela,raspadita,entrada,recital,show,cine,teatro,fiesta,evento,festival,boliche,joda,juego,steam,playstation,bowling,paintball,karting,escape room,cumple,cumpleanos'],
     ['panaderia', 'Panadería', 'gasto', 'variable', '🥐', '#E0B36A', 'Deseo', 'panaderia,factura,medialuna,bizcochito,criollito,pan,docena de facturas,media docena,tortita,chipa,sanguchitos de miga,masas,budin'],
     ['kiosco', 'Kiosco', 'gasto', 'variable', '🍫', '#B5838D', 'Deseo', 'kiosco,golosina,alfajor,chicle,chocolate,caramelo,pucho,cigarrillo,atado,marlboro,malboro,philip morris,lucky,camel,crafted,encendedor,vicio'],
     ['carniceria', 'Carnicería', 'gasto', 'variable', '🥩', '#B4533A', 'Necesidad', 'carniceria,carnicero,carne,churrasco,bife,vacio,kilo de asado,chorizo,morcilla,pollo,polleria'],
-    ['combustible', 'Combustible', 'gasto', 'variable', '⛽', '#6B8F3A', 'Necesidad', 'nafta,combustible,gasoil,diesel,tanque,shell,axion,puma,estacion de servicio,infinia,v-power,cargue nafta'],
+    ['combustible', 'Combustible', 'gasto', 'variable', '⛽', '#6B8F3A', 'Necesidad', 'nafta,combustible,gasoil,diesel,tanque,shell,axion,puma,estacion de servicio,infinia,v-power,cargue nafta,ypf'],
     ['gnc', 'GNC', 'gasto', 'variable', '🟢', '#4E9F3D', 'Necesidad', 'gnc,cargue gas,gas natural'],
     ['transporte', 'Transporte', 'gasto', 'variable', '🚕', '#5B7DB1', 'Necesidad', 'uber,didi,cabify,taxi,remis,colectivo,bondi,subte,tren,sube,peaje,estacionamiento,estacione,parking'],
     ['mantenimiento', 'Mantenimiento', 'gasto', 'variable', '🔧', '#8E9093', 'Necesidad', 'mantenimiento,reparacion,arreglo,arregle,repuesto,taller,mecanico,service,gomeria,cubierta,aceite,filtro,bateria,stereo,cooler,lavadero,herramienta'],
-    ['salud', 'Salud', 'gasto', 'variable', '🩺', '#3E8E7E', 'Necesidad', 'salud,prepaga,obra social,swiss medical,osde,galeno,medife,medico,doctor,turno,consulta,farmacia,remedio,medicamento,ibuprofeno,dentista,odontologo,psicologo,terapia,analisis,estudio medico,kinesiologo,oculista,anteojo'],
+    ['salud', 'Salud', 'gasto', 'variable', '🩺', '#3E8E7E', 'Necesidad', 'salud,prepaga,obra social,swiss medical,osde,galeno,medife,medico,doctor,turno,consulta,farmacia,remedio,medicamento,ibuprofeno,dentista,odontologo,psicologo,psicologa,terapeuta,terapia,analisis,estudio medico,kinesiologo,oculista,anteojo'],
     ['ropa', 'Ropa', 'gasto', 'variable', '👕', '#9AAE5B', 'Deseo', 'ropa,remera,pantalon,jean,zapatilla,zapato,buzo,campera,camisa,media,calzoncillo,short,malla,gorra,vestimenta'],
-    ['hogar', 'Hogar', 'gasto', 'variable', '🛋️', '#7FA650', 'Necesidad', 'hogar,mueble,electrodomestico,heladera,lavarropas,microondas,colchon,sabana,toalla,limpieza,lavandina,detergente,ferreteria,bazar,cargador,lampara,mudanza'],
-    ['educacion', 'Educación', 'gasto', 'variable', '📚', '#6C8EBF', 'Necesidad', 'curso,facultad,universidad,libro,clase,capacitacion,seminario,udemy,platzi,coderhouse,fotocopia,apunte'],
+    ['hogar', 'Hogar', 'gasto', 'variable', '🛋️', '#7FA650', 'Necesidad', 'hogar,mueble,electrodomestico,heladera,lavarropas,microondas,colchon,sabana,toalla,limpieza,lavandina,detergente,ferreteria,bazar,cargador,lampara,mudanza,lavanderia,lavadero de ropa,tintoreria'],
+    ['educacion', 'Educación', 'gasto', 'variable', '📚', '#6C8EBF', 'Necesidad', 'colegio,escuela,jardin,cuota del colegio,curso,facultad,universidad,libro,clase,capacitacion,seminario,udemy,platzi,coderhouse,fotocopia,apunte'],
     ['regalos-y-festejos', 'Regalos y festejos', 'gasto', 'variable', '🎁', '#D98C5F', 'Deseo', 'regalo,regale,festejo,torta,cotillon'],
     ['viajes', 'Viajes', 'gasto', 'variable', '✈️', '#4AA3A2', 'Deseo', 'viaje,vuelo,pasaje,aerolineas,flybondi,jetsmart,latam,hotel,hostel,airbnb,alojamiento,excursion,valija'],
     ['tecnologia', 'Tecnología', 'gasto', 'variable', '💻', '#5F7FA8', 'Deseo', 'notebook,computadora,auricular,parlante,monitor,teclado,mouse,tablet,ipad,iphone,samsung,joystick,consola,controladora,pendrive,ssd,smartwatch'],
     ['cuidado-personal', 'Cuidado personal', 'gasto', 'variable', '💈', '#A47FB0', 'Necesidad', 'peluqueria,barberia,corte de pelo,me corte el pelo,perfume,desodorante,shampoo,crema,afeitadora'],
     ['deporte', 'Deporte', 'gasto', 'variable', '🏋️', '#5DA271', 'Necesidad', 'gimnasio,gym,pileta,natacion,padel,futbol 5,cancha de futbol,club'],
     ['impuestos', 'Impuestos', 'gasto', 'variable', '🧾', '#7D6B57', 'Necesidad', 'impuesto,monotributo,afip,arca,ganancias,ingresos brutos,iibb,rentas,multa,sellos'],
+    ['drogas', 'Drogas', 'gasto', 'variable', '💊', '#9B8AE6', 'Deseo', 'droga,drogas,mdma,md,molly,extasis,xtc,pasti,pastis,pastilla de md,tusi,keta,ketamina,cocaina,merca,falopa,porro,faso,marihuana,cogollo,cogollos,cannabis,weed,lsd,popper,dealer,transa'],
+    ['mascotas', 'Mascotas', 'gasto', 'variable', '🐶', '#C9A227', 'Necesidad', 'mascota,mascotas,perro,perra,gato,gata,veterinaria,veterinario,vete,alimento para el perro,alimento para el gato,balanceado,dog chow,pedigree,royal canin,piedritas,antipulgas,pet shop,vacuna del perro'],
     ['imprevistos', 'Imprevistos', 'gasto', 'variable', '⚠️', '#C2554A', 'Necesidad', 'imprevisto,emergencia,urgencia,accidente'],
     ['otros-gastos', 'Otros gastos', 'gasto', 'variable', '💸', '#686A6C', null, 'varios,otros'],
     // ---- ingresos
@@ -614,9 +616,21 @@
   function partirEnClausulas(toks, nums) {
     var montos = nums.filter(function (N) { return N.rol === 'monto'; });
     montos.forEach(function (N) { N.score = puntaje(N, toks); });
+    // compra de dólares con los pesos que se pagaron: un solo movimiento
+    var sTodo = ' ' + texto(toks, 0, toks.length - 1) + ' ';
+    if (/\b(dolares|dolar|usd|u\$s|verdes|mep|blue)\b/.test(sTodo) && /\b(compre|compramos|cambie|cambiamos|puse|meti|pase|inverti|ahorre|converti)\b/.test(sTodo)) {
+      var enUsd = montos.filter(function (N) { return N.moneda === 'USD'; });
+      if (!enUsd.length) montos.forEach(function (N) {
+        var antes = texto(toks, Math.max(0, N.i0 - 3), N.i0 - 1);
+        if (!N.mult && /\b(dieron|recibi|recibo|quedaron|salieron|obtuve|consegui|son)\b/.test(antes)) { N.moneda = 'USD'; enUsd.push(N); }
+      });
+      var enArs = montos.filter(function (N) { return N.moneda !== 'USD'; });
+      if (enUsd.length === 1 && enArs.length === 1) enArs[0].parDolar = true;
+    }
     // precio de un activo/moneda: no corta
     var anclas = [];
     montos.forEach(function (N, idx) {
+      if (N.parDolar) return;
       if (N.posiblePrecio) {
         // ¿hay una cantidad o un monto en moneda extranjera justo antes en la misma zona?
         var prev = nums.filter(function (M) { return M.i1 < N.i0 && N.i0 - M.i1 <= 6; }).pop();
@@ -697,7 +711,8 @@
       if (tiene(ACTIVOS, t.n)) {
         var a = ACTIVOS[t.n];
         var mayus = /^[A-Z0-9]{2,6}$/.test(t.o);
-        if (a[2] || claseExplicita || (verboInv && mayus)) encontrado = { ticker: a[0], clase: claseExplicita || a[1] };
+        var esNafta = /\b(nafta|gasoil|diesel|combustible|cargue|tanque|estacion|gnc|super|infinia)\b/.test(s);
+        if ((a[2] && !esNafta && (verboInv || mayus || claseExplicita)) || claseExplicita || (verboInv && mayus)) encontrado = { ticker: a[0], clase: claseExplicita || a[1] };
       } else if (claseExplicita && /^[A-Z][A-Z0-9]{1,5}$/.test(t.o) && !tiene(MONEDA_ANTES, t.n) && t.n !== 'on') {
         encontrado = { ticker: t.o.toUpperCase(), clase: claseExplicita };
       }
@@ -719,6 +734,11 @@
               ['unos', 'unas', 'los', 'las', 'el', 'un', 'de', '$', 'ars', 'pesos', 'y', 'medio', 'media'].indexOf(w2) >= 0)) { soloNumeros = false; break; }
       }
       if (hayUsd && soloNumeros) encontrado = { ticker: 'USD', clase: 'usd' };
+    }
+    // "puse / pasé / cambié 450 lucas a dólares", "compré dólares con 300 mil"
+    if (!encontrado && /\b(puse|meti|pase|pasamos|cambie|cambiamos|inverti|ahorre|converti|compre|compramos)\b/.test(s) &&
+        /\b(en|a|de) (dolares|dolar|verdes|usd|u\$s|dolar blue|dolar mep|mep|blue|billetes verdes)\b|\b(compre|compramos) (dolares|verdes|usd)\b/.test(s)) {
+      encontrado = { ticker: 'USD', clase: 'usd' };
     }
     return encontrado;
   }
@@ -864,6 +884,8 @@
     if (tipoGrupo === 'gasto' && puntos['cat-comida'] && ctx.catPorId['cat-delivery'] && /\b(pedi|pedimos|encargue|encargamos)\b/.test(s)) {
       puntos['cat-delivery'] = (puntos['cat-delivery'] || 0) + puntos['cat-comida'] + 0.5;
     }
+    // "la cuota del gimnasio / del colegio": la cuota es la forma de pago, manda lo otro
+    if (puntos['cat-cuotas'] && Object.keys(puntos).some(function (k) { return k !== 'cat-cuotas' && puntos[k] > 0; })) delete puntos['cat-cuotas'];
     var mejor = null, mv = 0, seg = 0;
     Object.keys(puntos).forEach(function (k) {
       if (puntos[k] > mv) { seg = mv; mv = puntos[k]; mejor = k; } else if (puntos[k] > seg) seg = puntos[k];
@@ -983,6 +1005,9 @@
     var activo = instrumento ? null : detectarActivo(toks, c0, c1);
     var cuentas = detectarCuentas(sEsp, ctx);
     var proyecto = detectarProyecto(s, ctx, null);
+    // categoría dicha explícitamente (manda sobre lo que se deduzca)
+    var mcat = /\b(?:categoria|rubro)\s+(?:de\s+)?([a-z][a-z0-9 ]{1,28}?)\s*(?=$|,|\.|\by\b|\bcon\b|\bpor\b|\bpara\b|\bel\b|\bque\b|\d)/.exec(s + ' ');
+    if (mcat) proyecto = null;
     var tipoInfo = detectarTipo(sEsp, {
       instrumento: instrumento, activo: activo, cuentas: cuentas.length,
       proyectoInversion: proyecto && proyecto.esInversion
@@ -1186,6 +1211,19 @@
     } else if (mov.moneda === 'BRL') {
       var pb = ctx.proyectos.filter(function (p) { return /brasil/i.test(p.nombre); })[0];
       if (pb) mov.proyecto = pb.id;
+    }
+
+    // ---- categoría dicha explícitamente: "en la categoría drogas", "rubro mascotas" (si no existe, se crea)
+    if (mcat && (tipo === 'gasto' || tipo === 'ingreso')) {
+      var nomCat = mcat[1].trim().replace(/^(la|el|los|las)\s+/, '');
+      var existe = ctx.categorias.filter(function (c) { return c.tipo === tipo && (norm(c.nombre) === nomCat || raiz(norm(c.nombre)) === raiz(nomCat)); })[0];
+      if (existe) mov.categoria = existe.id;
+      else if (nomCat.length >= 3) {
+        mov.categoriaNueva = cap(nomCat);
+        mov.categoria = tipo === 'gasto' ? 'cat-otros-gastos' : 'cat-otros-ingresos';
+        mov.notas.push('categoría nueva: ' + cap(nomCat));
+      }
+      quitarFrases(toks, c0, c1, quitar, new RegExp('\\b(en |a |de |para )?(la |el )?(categoria|rubro) (de )?' + escRe(mcat[1].trim()) + '\\b'));
     }
 
     // ---- categoría
@@ -1417,6 +1455,8 @@
       plazoDias: m.plazoDias || null, tna: m.tna || null, resultado: m.resultado != null ? m.resultado : null,
       notas: notas || null, porIA: !!m.porIA
     };
+    // "categoría X" que todavía no existe: queda con su id y el nombre, y la app la crea al verla
+    if (m.categoriaNueva) { base.categoria = 'cat-' + slug(m.categoriaNueva); base.categoriaNueva = m.categoriaNueva; }
     if (base.moneda !== 'ARS' && !(m.activo) && base.monto && (!base.montoARS || base.montoARS === base.monto)) {
       var tc = base.tc || (extra.cotizaciones || {})[base.moneda];
       if (tc) { base.tc = tc; base.montoARS = redondear(base.monto * tc); }

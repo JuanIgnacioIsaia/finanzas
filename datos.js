@@ -71,9 +71,13 @@
     var base = Motor.catalogoBase();
     var pares = [['categorias', base.categorias], ['cuentas', base.cuentas], ['proyectos', base.proyectos]];
     for (var i = 0; i < pares.length; i++) {
-      var s = pares[i][0], nuevos = pares[i][1].filter(function (r) { return !mem[s][r.id]; });
+      // nuevos del catálogo base, y los de base que nunca editaste se actualizan (palabras, íconos)
+      var s = pares[i][0], nuevos = pares[i][1].filter(function (r) {
+        var ex = mem[s][r.id];
+        return !ex || (ex.base && !ex.updatedAt && !ex.dirty && JSON.stringify(ex.palabras || ex.alias) !== JSON.stringify(r.palabras || r.alias));
+      });
       nuevos.forEach(function (r) { r.dirty = 0; mem[s][r.id] = r; });
-      await putVarios(s, nuevos);
+      if (nuevos.length) await putVarios(s, nuevos);
     }
     if (!mem.meta.ajustes) await meta('ajustes', {
       nombre: 'Juani', voz: 'auto', ia: false, confirmar: false, casaDolar: 'oficial',
@@ -162,8 +166,10 @@
 
   function resumenMes(mes, hoyISO) {
     var movs = lista('movimientos');
-    var r = { mes: mes, ingresos: 0, gastos: 0, invertido: 0, rescatado: 0, prestado: 0, cobrado: 0, cats: {}, catsIng: {}, porDia: {},
-      nd: { Necesidad: 0, Deseo: 0 }, hoy: 0, hoyN: 0, cantidad: 0, movs: [] };
+    var r = { mes: mes, ingresos: 0, gastos: 0, invertido: 0, rescatado: 0, prestado: 0, cobrado: 0, recibido: 0, pagado: 0,
+      financiado: 0, cats: {}, catsN: {}, catsIng: {}, porDia: {}, porCuenta: {}, porSemana: [0, 0, 0, 0, 0, 0, 0],
+      nd: { Necesidad: 0, Deseo: 0 }, hoy: 0, hoyN: 0, cantidad: 0, nGastos: 0, mayor: null, movs: [],
+      usdComprado: 0, usdVendido: 0, pesosDolares: 0, pesosVentaDolares: 0 };
     movs.forEach(function (m) {
       var mm = mesDe(m.fecha), v = montoARS(m);
       if (m.tipo === 'gasto') r.porDia[m.fecha] = (r.porDia[m.fecha] || 0) + v;
@@ -171,16 +177,36 @@
       if (mm !== mes) return;
       r.cantidad++; r.movs.push(m);
       if (m.tipo === 'gasto') {
-        r.gastos += v; r.cats[m.categoria || 'cat-otros-gastos'] = (r.cats[m.categoria || 'cat-otros-gastos'] || 0) + v;
+        var kc = m.categoria || 'cat-otros-gastos';
+        r.gastos += v; r.cats[kc] = (r.cats[kc] || 0) + v; r.catsN[kc] = (r.catsN[kc] || 0) + 1; r.nGastos++;
+        if (m.financiadoPor) r.financiado += v;
+        r.porCuenta[m.cuenta || '?'] = (r.porCuenta[m.cuenta || '?'] || 0) + v;
+        r.porSemana[new Date(m.fecha + 'T12:00:00').getDay()] += v;
+        if (!r.mayor || v > montoARS(r.mayor)) r.mayor = m;
         if (m.nd === 'Deseo') r.nd.Deseo += v; else if (m.nd === 'Necesidad') r.nd.Necesidad += v;
       } else if (m.tipo === 'ingreso') { r.ingresos += v; r.catsIng[m.categoria || 'cat-otros-ingresos'] = (r.catsIng[m.categoria || 'cat-otros-ingresos'] || 0) + v; }
-      else if (m.tipo === 'inversion' || m.tipo === 'compra_activo') r.invertido += v;
-      else if (m.tipo === 'rescate' || m.tipo === 'venta_activo') r.rescatado += v;
+      else if (m.tipo === 'inversion' || m.tipo === 'compra_activo') {
+        r.invertido += v;
+        if (esDolar(m)) { r.usdComprado += Number(m.activo && m.activo.cantidad) || 0; r.pesosDolares += v; }
+      }
+      else if (m.tipo === 'rescate' || m.tipo === 'venta_activo') {
+        r.rescatado += v;
+        if (esDolar(m)) { r.usdVendido += Number(m.activo && m.activo.cantidad) || 0; r.pesosVentaDolares += v; }
+      }
       else if (m.tipo === 'prestamo_dado') r.prestado += v;
       else if (m.tipo === 'cobro_prestamo') r.cobrado += v;
+      else if (m.tipo === 'prestamo_recibido') r.recibido += v;
+      else if (m.tipo === 'pago_deuda') r.pagado += v;
     });
-    r.balance = r.ingresos - r.gastos;
-    r.tasaAhorro = r.ingresos > 0 ? r.balance / r.ingresos : null;
+    // lo que pusiste en dólares o inversiones ya no está en pesos: se descuenta del balance
+    r.ahorro = r.invertido - r.rescatado;
+    r.resultado = r.ingresos - r.gastos;
+    r.balance = r.ingresos - r.gastos - r.ahorro;
+    // plata que de verdad entró y salió (incluye préstamos; un gasto que pagó otro no sale de tu bolsillo)
+    r.flujo = r.balance + r.cobrado + r.recibido + r.financiado - r.prestado - r.pagado;
+    r.tasaAhorro = r.ingresos > 0 ? r.ahorro / r.ingresos : null;
+    r.tasaGasto = r.ingresos > 0 ? r.gastos / r.ingresos : null;
+    r.ticket = r.nGastos ? r.gastos / r.nGastos : 0;
     var p = mes.split('-'), y = +p[0], mo = +p[1];
     r.diasMes = new Date(y, mo, 0).getDate();
     var hoyMes = mesDe(hoyISO) === mes;
@@ -188,6 +214,61 @@
     r.ritmo = r.diaActual ? r.gastos / r.diaActual : 0;
     r.proyeccion = hoyMes ? r.ritmo * r.diasMes : r.gastos;
     return r;
+  }
+
+  function esDolar(m) { return (m.activo && m.activo.ticker === 'USD') || m.categoria === 'cat-dolares'; }
+
+  /** Resúmenes de los últimos n meses (el último es `hasta`). */
+  function historial(n, hasta, hoyISO) {
+    var out = [], p = hasta.split('-'), y = +p[0], mo = +p[1];
+    for (var i = n - 1; i >= 0; i--) {
+      var d = new Date(y, mo - 1 - i, 1), k = d.getFullYear() + '-' + (d.getMonth() < 9 ? '0' : '') + (d.getMonth() + 1);
+      out.push(resumenMes(k, hoyISO));
+    }
+    return out;
+  }
+
+  /** Dólares: cuántos compraste y vendiste cada mes, a qué precio, y cuántos tenés acumulados. */
+  function dolares() {
+    var porMes = {}, total = 0, costo = 0;
+    lista('movimientos').filter(esDolar).sort(function (a, b) { return a.fecha < b.fecha ? -1 : 1; }).forEach(function (m) {
+      var k = mesDe(m.fecha), q = Number(m.activo && m.activo.cantidad) || 0, v = montoARS(m);
+      var x = porMes[k] = porMes[k] || { mes: k, comprados: 0, vendidos: 0, pesos: 0, pesosVenta: 0, movs: 0 };
+      x.movs++;
+      if (m.tipo === 'compra_activo' || m.tipo === 'inversion') { x.comprados += q; x.pesos += v; total += q; costo += v; }
+      else if (m.tipo === 'venta_activo' || m.tipo === 'rescate') {
+        var pc = total > 0 ? costo / total : 0;
+        x.vendidos += q; x.pesosVenta += v; total -= q; costo -= pc * q;
+      }
+    });
+    var acum = 0, meses = Object.keys(porMes).sort().map(function (k) {
+      var x = porMes[k]; acum += x.comprados - x.vendidos;
+      x.neto = x.comprados - x.vendidos; x.acumulado = acum; x.tc = x.comprados ? x.pesos / x.comprados : null;
+      return x;
+    });
+    var tc = (ajustes().cotizaciones || {}).USD || 0;
+    return { total: total, costo: Math.max(0, costo), promedio: total > 0 ? costo / total : null, meses: meses,
+      cotizacion: tc, valorHoy: total * tc, resultado: total * tc - Math.max(0, costo) };
+  }
+
+  /** Una categoría a lo largo del tiempo: por mes, promedio, total del año, cuántas veces. */
+  function statsCategoria(catId, hasta) {
+    var ms = lista('movimientos').filter(function (m) { return m.categoria === catId; });
+    var porMes = {}, anio = hasta.slice(0, 4), totAnio = 0, n = 0, ult = null;
+    ms.forEach(function (m) {
+      var v = montoARS(m), k = mesDe(m.fecha);
+      porMes[k] = (porMes[k] || 0) + v; n++;
+      if (k.slice(0, 4) === anio) totAnio += v;
+      if (!ult || m.fecha > ult.fecha) ult = m;
+    });
+    var serie = [], p = hasta.split('-'), y = +p[0], mo = +p[1];
+    for (var i = 5; i >= 0; i--) {
+      var d = new Date(y, mo - 1 - i, 1), k = d.getFullYear() + '-' + (d.getMonth() < 9 ? '0' : '') + (d.getMonth() + 1);
+      serie.push({ mes: k, v: porMes[k] || 0 });
+    }
+    var conDatos = Object.keys(porMes).length;
+    return { serie: serie, totalAnio: totAnio, veces: n, ultimo: ult, promedioMensual: conDatos ? Object.keys(porMes).reduce(function (s, k) { return s + porMes[k]; }, 0) / conDatos : 0,
+      movimientos: ms };
   }
 
   function saldosCuentas() {
@@ -342,6 +423,7 @@
           (porStore[s] = porStore[s] || []).push(r);
         });
         for (var s in porStore) await putVarios(s, porStore[s]);
+        await crearCategoriasPedidas(porStore.movimientos || []);
         var limpios = {};
         cambios.forEach(function (c) {
           var loc = mem[c._s][c.id];
@@ -363,6 +445,17 @@
       }
     }
   };
+
+  /** Movimientos que llegaron (p. ej. por el chat de Claude) con una categoría que pidió crear. */
+  async function crearCategoriasPedidas(movs) {
+    for (var i = 0; i < movs.length; i++) {
+      var m = movs[i];
+      if (!m.categoriaNueva || !m.categoria || mem.categorias[m.categoria]) continue;
+      var tipo = m.tipo === 'ingreso' ? 'ingreso' : 'gasto';
+      await guardar('categorias', { id: m.categoria, nombre: m.categoriaNueva, tipo: tipo, grupo: tipo === 'gasto' ? 'variable' : null, icono: '🏷️',
+        color: '#9B8AE6', nd: null, palabras: [Motor._.norm(m.categoriaNueva)], orden: 300, archivada: false }, { silencioso: true });
+    }
+  }
 
   /** Llama al respaldo con un tope de 40 s: si el teléfono suspende la app a mitad de camino, no queda colgada para siempre. */
   async function llamar(v, cuerpo) {
@@ -397,7 +490,7 @@
     soloMemoria: function () { return soloMemoria; },
     cargar: cargar, lista: lista, uno: uno, guardar: guardar, guardarVarios: guardarVarios, borrar: borrar,
     meta: meta, ajustes: ajustes, cambiarAjustes: cambiarAjustes, on: on, emitir: emitir, uuid: uuid,
-    contextoMotor: contextoMotor, resumenMes: resumenMes, saldosCuentas: saldosCuentas, cartera: cartera,
+    contextoMotor: contextoMotor, resumenMes: resumenMes, historial: historial, dolares: dolares, statsCategoria: statsCategoria, esDolar: esDolar, saldosCuentas: saldosCuentas, cartera: cartera,
     montoARS: montoARS, actualizarCotizaciones: actualizarCotizaciones,
     exportarJSON: exportarJSON, exportarCSV: exportarCSV, importarJSON: importarJSON,
     decodificarVinculo: decodificarVinculo, Sync: Sync

@@ -1,6 +1,6 @@
 /* Service worker: la app abre y funciona sin señal. Los datos viven en IndexedDB,
    este archivo solo guarda la "cáscara" (HTML, estilos y código). */
-var VERSION = 'finanzas-2b0ea65a90';
+var VERSION = 'finanzas-e5dc7f9c6e';
 var ARCHIVOS = ["./", "index.html", "estilos.css", "motor.js", "datos.js", "voz.js", "ia.js", "app.js", "manifest.webmanifest", "icono.svg", "icono-180.png", "icono-192.png", "icono-512.png"];
 
 self.addEventListener('install', function (e) {
